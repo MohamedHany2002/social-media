@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ image.title }}{% endblock %}
+{% block content %}
+<h1>Image Views {{image_views}}</h1>
+<h1>{{ image.title }}</h1>
+<img src="{{ image.image.url }}" width="100" height="100" class="image-detail">
+
+{% with total_likes=image.likes.count user_likes=image.likes.all %}
+<div class="image-info">
+<div>
+  <span>like {{ total_likes|pluralize }}</span>
+<span class="count">
+ {{ total_likes }} 
+</span>
+
+<a href="#" data-id="{{ image.id }}" data-action="{% if request.user in user_likes %}un{% endif %}like" class="like">
+    {% if request.user not in user_likes %}
+    like
+    {% else %}
+    unlike
+    {% endif %}
+    </a>
+</div>
+{{ image.description|linebreaks }}
+</div>
+<div class="image-likes">
+{% for user in image.likes.all %}
+<div>
+<img src="{{ user.profile.image.url }}">
+<p>{{ user.first_name }}</p>
+</div>
+{% empty %}
+Nobody likes this image yet.
+{% endfor %}
+</div>
+{% endwith %}
+{% endblock %}
+
+{% block domready %}
+    $("a.like").click(function(e){
+        e.preventDefault()
+        $.post('{%url "like"%}',
+        {  
+          id: $(this).data('id'),
+          action: $(this).data('action')
+        },
+        function(data){
+          if (data['status']=='ok'){
+              var previous_action=$("a.like").data('action')
+              $("a.like").data('action',previous_action =='like'?'unlike':'like');
+              $("a.like").text(previous_action=='like'?'unlike':'like')
+              var previous_count=parseInt($('span.count').text())
+              $('span.count').text(previous_action=='like'?previous_count+1:previous_count-1)
+
+          } 
+        }
+        )
+      });
+{%endblock%}
+
+

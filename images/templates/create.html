@@ -1,0 +1,10 @@
+
+<img src="{{ request.GET.url }}" height="50" width="50" class="image-preview"> <br>
+{{ form.url }}
+<form action="." method="POST">
+    {{form.title}}
+    {{form.url}}
+    {%csrf_token%}
+        
+    <button type="submit">  create</button>
+</form>
